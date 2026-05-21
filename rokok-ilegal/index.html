@@ -488,13 +488,13 @@
 
     <script>
         const VALID_CREDENTIALS = [
-            { username: 'admin', password: 'beacukai2025' },
-            { username: 'operator', password: 'pangkalpinang' }
+            { username: 'admin', password: 'bedelew' }
         ];
 
         window.addEventListener('DOMContentLoaded', function() {
             const session = sessionStorage.getItem('loggedIn');
-            const remembered = localStorage.getItem('rememberedUser');
+            localStorage.removeItem('rememberedUser');
+            const remembered = localStorage.getItem('rokokIlegalRememberedUser');
             const urlParams = new URLSearchParams(window.location.search);
             
             if (session) {
@@ -556,9 +556,9 @@
                     sessionStorage.setItem('currentUser', username);
                     
                     if (document.getElementById('rememberMe').checked) {
-                        localStorage.setItem('rememberedUser', username);
+                        localStorage.setItem('rokokIlegalRememberedUser', username);
                     } else {
-                        localStorage.removeItem('rememberedUser');
+                        localStorage.removeItem('rokokIlegalRememberedUser');
                     }
                     
                     window.location.href = 'dashboard.html';

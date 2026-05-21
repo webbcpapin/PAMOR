@@ -349,15 +349,6 @@
     </style>
 </head>
 <body>
-    <!-- Auth Check Script (runs first) -->
-    <script>
-        (function() {
-            if (!sessionStorage.getItem('loggedIn')) {
-                window.location.href = 'index.html';
-            }
-        })();
-    </script>
-
     <div class="container">
         <!-- Header -->
         <div class="header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
@@ -959,10 +950,10 @@
         });
     </script>
 
-    <!-- Session & Logout Script -->
+    <!-- Display & Logout Script -->
     <script>
         (function() {
-            const currentUser = sessionStorage.getItem('currentUser') || 'User';
+            const currentUser = sessionStorage.getItem('currentUser') || 'Admin';
             const userDisplay = document.getElementById('userDisplay');
             if (userDisplay) {
                 userDisplay.textContent = currentUser.charAt(0).toUpperCase() + currentUser.slice(1);
@@ -972,29 +963,8 @@
         function handleLogout() {
             sessionStorage.removeItem('loggedIn');
             sessionStorage.removeItem('currentUser');
-            window.location.href = 'index.html?logout=1';
+            window.location.href = 'rokok-ilegal/index.html?logout=1';
         }
-
-        let inactivityTimer;
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(function() {
-                sessionStorage.removeItem('loggedIn');
-                sessionStorage.removeItem('currentUser');
-                window.location.href = 'index.html?timeout=1';
-            }, 30 * 60 * 1000);
-        }
-
-        document.addEventListener('mousemove', resetInactivityTimer);
-        document.addEventListener('keypress', resetInactivityTimer);
-        document.addEventListener('click', resetInactivityTimer);
-        resetInactivityTimer();
-
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted && !sessionStorage.getItem('loggedIn')) {
-                window.location.href = 'index.html';
-            }
-        });
     </script>
 </body>
 </html>
