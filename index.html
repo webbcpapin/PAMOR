@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>PAMOR - Monitoring</title>
+<style>
+    body {
+        font-family: Arial;
+        margin: 0;
+        background: #f5f5f5;
+    }
+    header {
+        background: #1f3c88;
+        color: white;
+        padding: 15px;
+        text-align: center;
+    }
+    .container {
+        padding: 20px;
+    }
+    .card {
+        background: white;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+    input, select, textarea {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+    button {
+        background: #1f3c88;
+        color: white;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h2>PAMOR - Monitoring Lapangan</h2>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h3>Input Laporan</h3>
+
+        <label>Kegiatan</label>
+        <select id="kegiatan">
+            <option>Surveilance</option>
+            <option>Opsar BKC</option>
+            <option>Giat NPP</option>
+        </select>
+
+        <label>Lokasi</label>
+        <input type="text" id="lokasi">
+
+        <label>Koordinat</label>
+        <input type="text" id="koordinat" placeholder="-2.13, 106.11">
+
+        <label>Keterangan</label>
+        <textarea id="keterangan"></textarea>
+
+        <button onclick="simpanData()">Simpan</button>
+    </div>
+
+    <div class="card">
+        <h3>Data Laporan</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Kegiatan</th>
+                    <th>Lokasi</th>
+                    <th>Koordinat</th>
+                    <th>Waktu</th>
+                </tr>
+            </thead>
+            <tbody id="tabelData"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+function ambilData() {
+    return JSON.parse(localStorage.getItem("pamor")) || [];
+}
+
+function simpanData() {
+    const data = ambilData();
+
+    const item = {
+        kegiatan: document.getElementById("kegiatan").value,
+        lokasi: document.getElementById("lokasi").value,
+        koordinat: document.getElementById("koordinat").value,
+        waktu: new Date().toLocaleString()
+    };
+
+    data.push(item);
+    localStorage.setItem("pamor", JSON.stringify(data));
+
+    tampilkanData();
+}
+
+function tampilkanData() {
+    const data = ambilData();
+    const tabel = document.getElementById("tabelData");
+    tabel.innerHTML = "";
+
+    data.forEach(d => {
+        tabel.innerHTML += `
+            <tr>
+                <td>${d.kegiatan}</td>
+                <td>${d.lokasi}</td>
+                <td>${d.koordinat}</td>
+                <td>${d.waktu}</td>
+            </tr>
+        `;
+    });
+}
+
+tampilkanData();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekapitulasi Penindakan Rokok Ilegal 2023-2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a237e;
+            --primary-light: #3949ab;
+            --secondary: #283593;
+            --accent: #e53935;
+            --accent-light: #ef5350;
+            --success: #43a047;
+            --warning: #fb8c00;
+            --info: #1e88e5;
+            --dark: #0d1642;
+            --darker: #070e2e;
+            --card-bg: rgba(255,255,255,0.06);
+            --card-border: rgba(255,255,255,0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.7);
+            --text-muted: rgba(255,255,255,0.5);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(245, 87, 108, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(67, 233, 123, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 0 32px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .header .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Summary Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .card:nth-child(1)::after { background: var(--gradient-1); }
+        .card:nth-child(2)::after { background: var(--gradient-2); }
+        .card:nth-child(3)::after { background: var(--gradient-3); }
+        .card:nth-child(4)::after { background: var(--gradient-4); }
+
+        .card-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            letter-spacing: -1px;
+        }
+
+        .card:nth-child(1) .card-value { background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card:nth-child(2) .card-value { background: linear-gradient(135deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card:nth-child(3) .card-value { background: linear-gradient(135deg, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card:nth-child(4) .card-value { background: linear-gradient(135deg, #43e97b, #38f9d7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .card-unit {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Chart Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .chart-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .chart-panel.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            border-radius: 2px;
+            background: var(--gradient-1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container.tall {
+            height: 400px;
+        }
+
+        /* Legend */
+        .custom-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        /* Table Section */
+        .table-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .table-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            border-radius: 2px;
+            background: var(--gradient-3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text-primary);
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .num {
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .year-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .tag-2023 { background: rgba(229, 57, 53, 0.2); color: #ef5350; }
+        .tag-2024 { background: rgba(30, 136, 229, 0.2); color: #42a5f5; }
+        .tag-2025 { background: rgba(67, 160, 71, 0.2); color: #66bb6a; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .cards-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .cards-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.6rem; }
+            .card-value { font-size: 1.5rem; }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card, .chart-panel, .table-panel {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.05s; }
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.15s; }
+        .card:nth-child(4) { animation-delay: 0.2s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Rekapitulasi Penindakan Rokok Ilegal</h1>
+            <p class="subtitle">Data Barang Kena Cukai Hasil Tembakau (BKC HT) Tanpa Pita Cukai</p>
+            <div class="badge">
+                <span class="badge-dot"></span>
+                <span>Periode: 2023 - 2025 | Kantor Bea Cukai Pangkalpinang</span>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-label">Total Kasus Penindakan</div>
+                <div class="card-value">179</div>
+                <div class="card-unit">kasus selama 3 tahun</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Total Rokok Ilegal</div>
+                <div class="card-value">807.430</div>
+                <div class="card-unit">batang rokok tanpa pita cukai</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Total Bungkus</div>
+                <div class="card-value">34.219</div>
+                <div class="card-unit">bungkus rokok ilegal</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Rata-rata per Kasus</div>
+                <div class="card-value">4.509</div>
+                <div class="card-unit">batang per penindakan</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-grid">
+            <!-- Yearly Comparison -->
+            <div class="chart-panel">
+                <div class="chart-title">Perbandingan per Tahun</div>
+                <div class="chart-container">
+                    <canvas id="yearlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Monthly Trend -->
+            <div class="chart-panel">
+                <div class="chart-title">Tren Bulanan (Batang)</div>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Brands -->
+            <div class="chart-panel full-width">
+                <div class="chart-title">Top 15 Merek Rokok Ilegal (Total Batang)</div>
+                <div class="chart-container tall">
+                    <canvas id="brandsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Monthly Cases Count -->
+            <div class="chart-panel">
+                <div class="chart-title">Jumlah Kasus per Bulan</div>
+                <div class="chart-container">
+                    <canvas id="monthlyCasesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Brands per Year -->
+            <div class="chart-panel">
+                <div class="chart-title">Top 10 Merek per Tahun (2023-2025)</div>
+                <div class="chart-container">
+                    <canvas id="yearlyBrandsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yearly Detail Tables -->
+        <div class="table-panel">
+            <div class="table-title">Rekapitulasi Tahunan</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tahun</th>
+                        <th>Jumlah Kasus</th>
+                        <th>Total Batang</th>
+                        <th>Total Bungkus</th>
+                        <th>Min/Kasus</th>
+                        <th>Max/Kasus</th>
+                        <th>Rata-rata</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="year-tag tag-2023">2023</span></td>
+                        <td class="num">41</td>
+                        <td class="num">178.270</td>
+                        <td class="num">8.664</td>
+                        <td class="num">120</td>
+                        <td class="num">79.000</td>
+                        <td class="num">4.348</td>
+                    </tr>
+                    <tr>
+                        <td><span class="year-tag tag-2024">2024</span></td>
+                        <td class="num">69</td>
+                        <td class="num">389.512</td>
+                        <td class="num">14.848</td>
+                        <td class="num">180</td>
+                        <td class="num">32.600</td>
+                        <td class="num">5.645</td>
+                    </tr>
+                    <tr>
+                        <td><span class="year-tag tag-2025">2025</span></td>
+                        <td class="num">69</td>
+                        <td class="num">239.648</td>
+                        <td class="num">10.707</td>
+                        <td class="num">200</td>
+                        <td class="num">26.200</td>
+                        <td class="num">3.473</td>
+                    </tr>
+                    <tr style="border-top: 2px solid rgba(255,255,255,0.15);">
+                        <td><strong>TOTAL</strong></td>
+                        <td class="num"><strong>179</strong></td>
+                        <td class="num"><strong>807.430</strong></td>
+                        <td class="num"><strong>34.219</strong></td>
+                        <td class="num">120</td>
+                        <td class="num">79.000</td>
+                        <td class="num"><strong>4.509</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Top Brands Table -->
+        <div class="table-panel">
+            <div class="table-title">Top 15 Merek Rokok Ilegal (Total 2023-2025)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Merek</th>
+                        <th>Total Batang</th>
+                        <th>Est. Bungkus (@20)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Van Bold</td><td class="num">83.160</td><td class="num">4.158</td></tr>
+                    <tr><td>2</td><td>Classy Bold</td><td class="num">55.780</td><td class="num">2.789</td></tr>
+                    <tr><td>3</td><td>Platinum Seven</td><td class="num">35.480</td><td class="num">1.774</td></tr>
+                    <tr><td>4</td><td>Smith Hijau</td><td class="num">34.760</td><td class="num">1.738</td></tr>
+                    <tr><td>5</td><td>Smith Menthol</td><td class="num">30.900</td><td class="num">1.545</td></tr>
+                    <tr><td>6</td><td>Oris</td><td class="num">26.520</td><td class="num">1.326</td></tr>
+                    <tr><td>7</td><td>Smith Full Flavor</td><td class="num">26.040</td><td class="num">1.302</td></tr>
+                    <tr><td>8</td><td>Manchester Russet Blast</td><td class="num">25.800</td><td class="num">1.290</td></tr>
+                    <tr><td>9</td><td>Diza</td><td class="num">21.820</td><td class="num">1.091</td></tr>
+                    <tr><td>10</td><td>Smith</td><td class="num">18.180</td><td class="num">909</td></tr>
+                    <tr><td>11</td><td>Booster 86, MLD Mild, Manchester Putih & Blend</td><td class="num">15.800</td><td class="num">790</td></tr>
+                    <tr><td>12</td><td>C@ffee Bleck</td><td class="num">15.800</td><td class="num">790</td></tr>
+                    <tr><td>13</td><td>Chess</td><td class="num">15.300</td><td class="num">765</td></tr>
+                    <tr><td>14</td><td>GP</td><td class="num">14.480</td><td class="num">724</td></tr>
+                    <tr><td>15</td><td>Humer</td><td class="num">13.200</td><td class="num">660</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Monthly Detail -->
+        <div class="table-panel">
+            <div class="table-title">Rekapitulasi Bulanan - Jumlah Batang Rokok Ilegal</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bulan</th>
+                        <th class="num">2023</th>
+                        <th class="num">2024</th>
+                        <th class="num">2025</th>
+                        <th class="num">Total 3 Tahun</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Januari</td><td class="num">2.500</td><td class="num">27.240</td><td class="num">3.700</td><td class="num"><strong>33.440</strong></td></tr>
+                    <tr><td>Februari</td><td class="num">0</td><td class="num">12.860</td><td class="num">44.320</td><td class="num"><strong>57.180</strong></td></tr>
+                    <tr><td>Maret</td><td class="num">0</td><td class="num">240</td><td class="num">5.200</td><td class="num"><strong>5.440</strong></td></tr>
+                    <tr><td>April</td><td class="num">200</td><td class="num">4.220</td><td class="num">3.780</td><td class="num"><strong>8.200</strong></td></tr>
+                    <tr><td>Mei</td><td class="num">10.690</td><td class="num">7.180</td><td class="num">7.020</td><td class="num"><strong>24.890</strong></td></tr>
+                    <tr><td>Juni</td><td class="num">6.740</td><td class="num">8.600</td><td class="num">20.460</td><td class="num"><strong>35.800</strong></td></tr>
+                    <tr><td>Juli</td><td class="num">35.000</td><td class="num">60.200</td><td class="num">31.208</td><td class="num"><strong>126.408</strong></td></tr>
+                    <tr><td>Agustus</td><td class="num">8.240</td><td class="num">136.288</td><td class="num">60.200</td><td class="num"><strong>204.728</strong></td></tr>
+                    <tr><td>September</td><td class="num">100.820</td><td class="num">34.000</td><td class="num">38.680</td><td class="num"><strong>173.500</strong></td></tr>
+                    <tr><td>Oktober</td><td class="num">4.400</td><td class="num">74.508</td><td class="num">8.400</td><td class="num"><strong>87.308</strong></td></tr>
+                    <tr><td>November</td><td class="num">8.580</td><td class="num">20.576</td><td class="num">10.940</td><td class="num"><strong>40.096</strong></td></tr>
+                    <tr><td>Desember</td><td class="num">1.100</td><td class="num">3.600</td><td class="num">5.740</td><td class="num"><strong>10.440</strong></td></tr>
+                    <tr style="border-top: 2px solid rgba(255,255,255,0.15);">
+                        <td><strong>TOTAL</strong></td>
+                        <td class="num"><strong>178.270</strong></td>
+                        <td class="num"><strong>389.512</strong></td>
+                        <td class="num"><strong>239.648</strong></td>
+                        <td class="num"><strong>807.430</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Monthly Cases -->
+        <div class="table-panel">
+            <div class="table-title">Rekapitulasi Bulanan - Jumlah Kasus Penindakan</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bulan</th>
+                        <th class="num">2023</th>
+                        <th class="num">2024</th>
+                        <th class="num">2025</th>
+                        <th class="num">Total 3 Tahun</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Januari</td><td class="num">1</td><td class="num">4</td><td class="num">1</td><td class="num"><strong>6</strong></td></tr>
+                    <tr><td>Februari</td><td class="num">0</td><td class="num">2</td><td class="num">7</td><td class="num"><strong>9</strong></td></tr>
+                    <tr><td>Maret</td><td class="num">0</td><td class="num">1</td><td class="num">2</td><td class="num"><strong>3</strong></td></tr>
+                    <tr><td>April</td><td class="num">1</td><td class="num">4</td><td class="num">4</td><td class="num"><strong>9</strong></td></tr>
+                    <tr><td>Mei</td><td class="num">2</td><td class="num">3</td><td class="num">6</td><td class="num"><strong>11</strong></td></tr>
+                    <tr><td>Juni</td><td class="num">7</td><td class="num">7</td><td class="num">8</td><td class="num"><strong>22</strong></td></tr>
+                    <tr><td>Juli</td><td class="num">6</td><td class="num">10</td><td class="num">11</td><td class="num"><strong>27</strong></td></tr>
+                    <tr><td>Agustus</td><td class="num">3</td><td class="num">14</td><td class="num">5</td><td class="num"><strong>22</strong></td></tr>
+                    <tr><td>September</td><td class="num">13</td><td class="num">3</td><td class="num">9</td><td class="num"><strong>25</strong></td></tr>
+                    <tr><td>Oktober</td><td class="num">2</td><td class="num">11</td><td class="num">3</td><td class="num"><strong>16</strong></td></tr>
+                    <tr><td>November</td><td class="num">3</td><td class="num">8</td><td class="num">7</td><td class="num"><strong>18</strong></td></tr>
+                    <tr><td>Desember</td><td class="num">3</td><td class="num">2</td><td class="num">6</td><td class="num"><strong>11</strong></td></tr>
+                    <tr style="border-top: 2px solid rgba(255,255,255,0.15);">
+                        <td><strong>TOTAL</strong></td>
+                        <td class="num"><strong>41</strong></td>
+                        <td class="num"><strong>69</strong></td>
+                        <td class="num"><strong>69</strong></td>
+                        <td class="num"><strong>179</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Sumber Data: Sistem Administrasi SBP (Surat Bukti Penindakan) Kantor Bea Cukai Pangkalpinang<br>
+            Generated on 18 Mei 2026 | Data akurat sesuai rekap administrasi
+        </div>
+    </div>
+
+    <script>
+        // Chart defaults
+        Chart.defaults.color = 'rgba(255,255,255,0.6)';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        const colors = {
+            2023: '#ef5350',
+            2024: '#42a5f5',
+            2025: '#66bb6a',
+            primary: 'rgba(102, 126, 234, 0.8)',
+            primary2: 'rgba(245, 87, 108, 0.8)',
+            primary3: 'rgba(67, 233, 123, 0.8)'
+        };
+
+        const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+        // 1. Yearly Comparison Chart
+        new Chart(document.getElementById('yearlyChart'), {
+            type: 'bar',
+            data: {
+                labels: ['2023', '2024', '2025'],
+                datasets: [
+                    {
+                        label: 'Total Batang',
+                        data: [178270, 389512, 239648],
+                        backgroundColor: [colors['2023']+'80', colors['2024']+'80', colors['2025']+'80'],
+                        borderColor: [colors['2023'], colors['2024'], colors['2025']],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Jumlah Kasus',
+                        data: [41, 69, 69],
+                        type: 'line',
+                        borderColor: '#ffd54f',
+                        backgroundColor: '#ffd54f20',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffd54f',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.3,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#cbd5e1',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Batang', color: 'rgba(255,255,255,0.4)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Kasus', color: 'rgba(255,255,255,0.4)' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+
+        // 2. Monthly Trend Chart
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: [
+                    {
+                        label: '2023',
+                        data: [2500, 0, 0, 200, 10690, 6740, 35000, 8240, 100820, 4400, 8580, 1100],
+                        borderColor: colors['2023'],
+                        backgroundColor: colors['2023'] + '15',
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4
+                    },
+                    {
+                        label: '2024',
+                        data: [27240, 12860, 240, 4220, 7180, 8600, 60200, 136288, 34000, 74508, 20576, 3600],
+                        borderColor: colors['2024'],
+                        backgroundColor: colors['2024'] + '15',
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4
+                    },
+                    {
+                        label: '2025',
+                        data: [3700, 44320, 5200, 3780, 7020, 20460, 31208, 60200, 38680, 8400, 10940, 5740],
+                        borderColor: colors['2025'],
+                        backgroundColor: colors['2025'] + '15',
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString('id-ID') + ' batang';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Batang Rokok', color: 'rgba(255,255,255,0.4)' }
+                    }
+                }
+            }
+        });
+
+        // 3. Top Brands Horizontal Bar
+        const brandNames = ['Van Bold', 'Classy Bold', 'Platinum Seven', 'Smith Hijau', 'Smith Menthol', 'Oris', 'Smith Full Flavor', 'Manchester Russet Blast', 'Diza', 'Smith', 'Booster 86, MLD, Manchester', 'C@ffee Bleck', 'Chess', 'GP', 'Humer'];
+        const brandValues = [83160, 55780, 35480, 34760, 30900, 26520, 26040, 25800, 21820, 18180, 15800, 15800, 15300, 14480, 13200];
+
+        new Chart(document.getElementById('brandsChart'), {
+            type: 'bar',
+            data: {
+                labels: brandNames,
+                datasets: [{
+                    label: 'Total Batang',
+                    data: brandValues,
+                    backgroundColor: brandValues.map((_, i) => {
+                        const grad = ['#ef5350', '#ec407a', '#ab47bc', '#7e57c2', '#5c6bc0', '#42a5f5', '#29b6f6', '#26c6da', '#26a69a', '#66bb6a', '#9ccc65', '#d4e157', '#ffee58', '#ffca28', '#ffa726'];
+                        return grad[i] + '90';
+                    }),
+                    borderColor: brandValues.map((_, i) => {
+                        const grad = ['#ef5350', '#ec407a', '#ab47bc', '#7e57c2', '#5c6bc0', '#42a5f5', '#29b6f6', '#26c6da', '#26a69a', '#66bb6a', '#9ccc65', '#d4e157', '#ffee58', '#ffca28', '#ffa726'];
+                        return grad[i];
+                    }),
+                    borderWidth: 1.5,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.x.toLocaleString('id-ID') + ' batang';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Batang', color: 'rgba(255,255,255,0.4)' }
+                    }
+                }
+            }
+        });
+
+        // 4. Monthly Cases Chart
+        new Chart(document.getElementById('monthlyCasesChart'), {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: [
+                    {
+                        label: '2023',
+                        data: [1, 0, 0, 1, 2, 7, 6, 3, 13, 2, 3, 3],
+                        backgroundColor: colors['2023'] + '70',
+                        borderColor: colors['2023'],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    },
+                    {
+                        label: '2024',
+                        data: [4, 2, 1, 4, 3, 7, 10, 14, 3, 11, 8, 2],
+                        backgroundColor: colors['2024'] + '70',
+                        borderColor: colors['2024'],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    },
+                    {
+                        label: '2025',
+                        data: [1, 7, 2, 4, 6, 8, 11, 5, 9, 3, 7, 6],
+                        backgroundColor: colors['2025'] + '70',
+                        borderColor: colors['2025'],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Jumlah Kasus', color: 'rgba(255,255,255,0.4)' }
+                    }
+                }
+            }
+        });
+
+        // 5. Top Brands per Year (Stacked or Grouped)
+        const top2023 = ['Van Bold', 'Classy Bold', 'Fantastic Mild', 'Lois Bold', 'Venturer Premium', 'New Unggul Exc.', 'Class Mango Top', 'Xenix', 'HJS', 'Moris Bold'];
+        const val2023 = [81920, 22080, 8080, 7700, 6400, 4000, 4000, 4000, 3000, 3000];
+        const top2024 = ['Smith Hijau', 'Classy Bold', 'Platinum Seven', 'Smith Menthol', 'Smith Full Flavor', 'C@ffee Bleck', 'Booster 86/MLD', 'Humer', 'HMIN', 'Classy'];
+        const val2024 = [34760, 33700, 30200, 19900, 18800, 15800, 15800, 13200, 12000, 12000];
+        const top2025 = ['Oris', 'Manc. Russet Blast', 'Diza', 'Smith', 'Chess', 'GP', 'Elite', 'Smith Menthol', 'Manc. Double Apple', 'Manc. Grapes'];
+        const val2025 = [26520, 25800, 21660, 17560, 15300, 14480, 12000, 11000, 10800, 10400];
+
+        new Chart(document.getElementById('yearlyBrandsChart'), {
+            type: 'radar',
+            data: {
+                labels: ['Van Bold/Smith', 'Classy Bold', 'Platinum/Seven', 'Menthol', 'Full Flavor', 'Oris/Diza', 'Manchester', 'Chess/GP', 'Humer', 'Lainnya'],
+                datasets: [
+                    {
+                        label: '2023',
+                        data: [81920, 22080, 0, 0, 0, 0, 0, 0, 0, 20000].map(v => v/1000),
+                        borderColor: colors['2023'],
+                        backgroundColor: colors['2023'] + '20',
+                        borderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: '2024',
+                        data: [34760, 33700, 30200, 19900, 18800, 0, 0, 0, 13200, 12000].map(v => v/1000),
+                        borderColor: colors['2024'],
+                        backgroundColor: colors['2024'] + '20',
+                        borderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: '2025',
+                        data: [17560, 0, 0, 11000, 0, 48180, 36600, 29780, 0, 0].map(v => v/1000),
+                        borderColor: colors['2025'],
+                        backgroundColor: colors['2025'] + '20',
+                        borderWidth: 2,
+                        pointRadius: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + (context.parsed.r * 1000).toLocaleString('id-ID') + ' batang';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255,255,255,0.08)' },
+                        grid: { color: 'rgba(255,255,255,0.08)' },
+                        pointLabels: { color: 'rgba(255,255,255,0.6)', font: { size: 10 } },
+                        ticks: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

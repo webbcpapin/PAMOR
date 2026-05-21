@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>PAMOR v3 - PRD Version</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body { font-family: Arial; margin:0; background:#f4f6f9;}
+header { background:#1f3c88; color:white; padding:15px; text-align:center;}
+.container { padding:20px;}
+.card { background:white; padding:15px; margin-bottom:15px; border-radius:8px;}
+input, select, textarea { width:100%; padding:8px; margin-top:5px; margin-bottom:10px;}
+button { background:#1f3c88; color:white; padding:10px; border:none; cursor:pointer;}
+table { width:100%; border-collapse: collapse;}
+th, td { border:1px solid #ddd; padding:8px;}
+#map { height:300px; margin-top:10px;}
+.badge { padding:3px 6px; border-radius:4px; color:white;}
+.sync { background:green;}
+.draft { background:orange;}
+</style>
+
+</head>
+<body>
+
+<header>
+<h2>PAMOR - Monitoring Intelijen (v3)</h2>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h3>Login (Simulasi Role)</h3>
+<select id="role" onchange="renderRole()">
+<option value="petugas">Petugas Lapangan</option>
+<option value="analis">Analis</option>
+<option value="pimpinan">Pimpinan</option>
+</select>
+</div>
+
+<div id="formSection" class="card">
+<h3>Input Laporan</h3>
+
+<label>Kegiatan</label>
+<select id="kegiatan">
+<option>Surveilance</option>
+<option>Opsar BKC</option>
+<option>Giat NPP</option>
+</select>
+
+<label>Target Intelijen</label>
+<input type="text" id="target" placeholder="Nama target">
+
+<label>Deskripsi</label>
+<textarea id="deskripsi"></textarea>
+
+<label>Koordinat</label>
+<input type="text" id="koordinat">
+
+<button onclick="ambilLokasi()">Ambil GPS</button>
+
+<label>Foto</label>
+<input type="file" id="foto">
+
+<button onclick="simpanData()">Kirim Laporan</button>
+</div>
+
+<div class="card">
+<h3>Dashboard Ringkas</h3>
+<p>Total Laporan: <span id="total">0</span></p>
+<p>Draft (Offline): <span id="draft">0</span></p>
+<p>Tersinkron: <span id="sync">0</span></p>
+</div>
+
+<div class="card">
+<h3>Peta Monitoring</h3>
+<div id="map"></div>
+</div>
+
+<div class="card">
+<h3>Data Laporan</h3>
+
+<input type="text" id="filter" placeholder="Filter target..." onkeyup="tampilkanData()">
+
+<table>
+<thead>
+<tr>
+<th>Kegiatan</th>
+<th>Target</th>
+<th>Koordinat</th>
+<th>Status</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="tabelData"></tbody>
+</table>
+
+</div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+let map = L.map('map').setView([-2.13,106.11], 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+let markers = [];
+
+function ambilData(){
+return JSON.parse(localStorage.getItem("pamor")) || [];
+}
+
+function ambilLokasi(){
+navigator.geolocation.getCurrentPosition(pos=>{
+let lat = pos.coords.latitude;
+let lng = pos.coords.longitude;
+koordinat.value = lat + "," + lng;
+map.setView([lat,lng],13);
+});
+}
+
+function simpanData(){
+let data = ambilData();
+
+let status = navigator.onLine ? "sync" : "draft";
+
+let item = {
+kegiatan: kegiatan.value,
+target: target.value,
+deskripsi: deskripsi.value,
+koordinat: koordinat.value,
+status: status,
+waktu: new Date().toISOString()
+};
+
+data.push(item);
+localStorage.setItem("pamor", JSON.stringify(data));
+
+tampilkanData();
+}
+
+function tampilkanData(){
+let data = ambilData();
+let filter = document.getElementById("filter").value.toLowerCase();
+let tabel = document.getElementById("tabelData");
+
+tabel.innerHTML = "";
+markers.forEach(m=>map.removeLayer(m));
+markers = [];
+
+let total=0, draft=0, sync=0;
+
+data.forEach((d,i)=>{
+
+if(!d.target.toLowerCase().includes(filter)) return;
+
+total++;
+if(d.status=="draft") draft++;
+if(d.status=="sync") sync++;
+
+let badge = d.status=="sync"
+? "<span class='badge sync'>SYNC</span>"
+: "<span class='badge draft'>DRAFT</span>";
+
+let row = `
+<tr>
+<td>${d.kegiatan}</td>
+<td>${d.target}</td>
+<td>${d.koordinat}</td>
+<td>${badge}</td>
+<td><button onclick="hapusData(${i})">Hapus</button></td>
+</tr>
+`;
+
+tabel.innerHTML += row;
+
+if(d.koordinat){
+let [lat,lng] = d.koordinat.split(",");
+let marker = L.marker([lat,lng]).addTo(map)
+.bindPopup(d.target);
+markers.push(marker);
+}
+});
+
+document.getElementById("total").innerText = total;
+document.getElementById("draft").innerText = draft;
+document.getElementById("sync").innerText = sync;
+}
+
+function hapusData(i){
+let data = ambilData();
+data.splice(i,1);
+localStorage.setItem("pamor", JSON.stringify(data));
+tampilkanData();
+}
+
+function renderRole(){
+let role = document.getElementById("role").value;
+
+if(role=="petugas"){
+formSection.style.display = "block";
+}
+if(role=="analis"){
+formSection.style.display = "none";
+}
+if(role=="pimpinan"){
+formSection.style.display = "none";
+}
+}
+
+tampilkanData();
+</script>
+
+</body>
+</html>

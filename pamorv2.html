@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>PAMOR v2</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body { font-family: Arial; margin:0; background:#f4f6f9;}
+header { background:#1f3c88; color:white; padding:15px; text-align:center;}
+.container { padding:20px;}
+.card { background:white; padding:15px; margin-bottom:15px; border-radius:8px;}
+input, select, textarea { width:100%; padding:8px; margin-top:5px; margin-bottom:10px;}
+button { background:#1f3c88; color:white; padding:10px; border:none; cursor:pointer;}
+table { width:100%; border-collapse: collapse;}
+th, td { border:1px solid #ddd; padding:8px;}
+#map { height:300px; margin-top:10px;}
+img.preview { width:80px; }
+</style>
+
+</head>
+<body>
+
+<header>
+<h2>PAMOR - Monitoring Lapangan (v2)</h2>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h3>Input Laporan</h3>
+
+<label>Kegiatan</label>
+<select id="kegiatan">
+<option>Surveilance</option>
+<option>Opsar BKC</option>
+<option>Giat NPP</option>
+</select>
+
+<label>Lokasi</label>
+<input type="text" id="lokasi">
+
+<label>Koordinat</label>
+<input type="text" id="koordinat">
+
+<button onclick="ambilLokasi()">Ambil GPS</button>
+
+<label>Keterangan</label>
+<textarea id="keterangan"></textarea>
+
+<label>Foto</label>
+<input type="file" id="foto">
+
+<button onclick="simpanData()">Simpan</button>
+</div>
+
+<div class="card">
+<h3>Peta Lokasi</h3>
+<div id="map"></div>
+</div>
+
+<div class="card">
+<h3>Data Laporan</h3>
+
+<input type="text" id="filter" placeholder="Cari lokasi..." onkeyup="tampilkanData()">
+
+<table>
+<thead>
+<tr>
+<th>Kegiatan</th>
+<th>Lokasi</th>
+<th>Koordinat</th>
+<th>Foto</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="tabelData"></tbody>
+</table>
+
+</div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+let map = L.map('map').setView([-2.13,106.11], 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+let markers = [];
+
+function ambilData(){
+return JSON.parse(localStorage.getItem("pamor")) || [];
+}
+
+function ambilLokasi(){
+navigator.geolocation.getCurrentPosition(pos=>{
+let lat = pos.coords.latitude;
+let lng = pos.coords.longitude;
+document.getElementById("koordinat").value = lat + "," + lng;
+
+map.setView([lat,lng],13);
+});
+}
+
+function simpanData(){
+let data = ambilData();
+
+let file = document.getElementById("foto").files[0];
+let reader = new FileReader();
+
+reader.onload = function(){
+let item = {
+kegiatan: kegiatan.value,
+lokasi: lokasi.value,
+koordinat: koordinat.value,
+foto: reader.result
+};
+
+data.push(item);
+localStorage.setItem("pamor", JSON.stringify(data));
+
+tampilkanData();
+};
+
+if(file){
+reader.readAsDataURL(file);
+}else{
+reader.onload();
+}
+}
+
+function hapusData(index){
+let data = ambilData();
+data.splice(index,1);
+localStorage.setItem("pamor", JSON.stringify(data));
+tampilkanData();
+}
+
+function tampilkanData(){
+let data = ambilData();
+let filter = document.getElementById("filter").value.toLowerCase();
+let tabel = document.getElementById("tabelData");
+
+tabel.innerHTML = "";
+markers.forEach(m=>map.removeLayer(m));
+markers = [];
+
+data.forEach((d,i)=>{
+if(!d.lokasi.toLowerCase().includes(filter)) return;
+
+let row = `
+<tr>
+<td>${d.kegiatan}</td>
+<td>${d.lokasi}</td>
+<td>${d.koordinat}</td>
+<td>${d.foto ? `<img src="${d.foto}" class="preview">` : '-'}</td>
+<td><button onclick="hapusData(${i})">Hapus</button></td>
+</tr>
+`;
+
+tabel.innerHTML += row;
+
+if(d.koordinat){
+let split = d.koordinat.split(",");
+let lat = parseFloat(split[0]);
+let lng = parseFloat(split[1]);
+
+let marker = L.marker([lat,lng]).addTo(map)
+.bindPopup(d.lokasi);
+
+markers.push(marker);
+}
+});
+}
+
+tampilkanData();
+</script>
+
+</body>
+</html>
